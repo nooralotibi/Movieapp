@@ -6,13 +6,41 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MovieListview: View {
+    let movies:[Movie]
+    @Environment(\.modelContext) private var context
+    private func deleteMovie(indexSet: IndexSet){
+        indexSet.forEach { index in
+            let movie = movies[index]
+            context.delete(movie)// delete certain movie
+            do {
+                try context.save()
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        List{
+            ForEach(movies){ movie in
+                NavigationLink(value: movie){
+                    HStack{
+                        Text(movie.title)
+                        Spacer()
+                        Text(movie.year.description)
+                    }
+                }
+              
+            }.onDelete(perform: deleteMovie)
+           
+        }.navigationDestination(for: Movie.self){ movie in
+        moviedetails(movie: movie)}
     }
 }
 
 #Preview {
-    MovieListview()
+    MovieListview(movies: [])
+        .modelContainer(for: [Movie.self])
 }

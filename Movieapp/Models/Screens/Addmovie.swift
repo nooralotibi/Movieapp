@@ -6,13 +6,47 @@
 //
 
 import SwiftUI
-
+import SwiftData
 struct Addmovie: View {
+    @Environment(\.dismiss) private var dismiss
+    //track different changes
+    @Environment(\.modelContext) private var context
+    @State private var title:String = ""
+    @State private var year:Int?
+    private var isFormValid: Bool{
+        !title.isEmptyOrWhiteSpace && year != nil
+    }
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+       Form{
+            TextField("Title", text: $title)
+            TextField("Year", value:  $year, format: .number)
+       } .navigationTitle("Add Movie")
+       .toolbar {
+           ToolbarItem( placement: .topBarLeading){
+               Button("close"){
+                   dismiss()
+               }
+           }
+           ToolbarItem( placement: .topBarTrailing){
+               Button("Save"){
+                 // create movie object
+                   let movie = Movie(title: title, year: year!)
+                   context.insert(movie) // movie save in db
+                   do {
+                       try context.save()
+                   }catch{
+                       print(error.localizedDescription)
+                   }
+                   dismiss()
+               }.disabled(!isFormValid)
+           }
+       }
     }
 }
 
 #Preview {
-    Addmovie()
+    NavigationStack{
+        Addmovie()
+            .modelContainer(for: [Movie.self])
+    }
 }

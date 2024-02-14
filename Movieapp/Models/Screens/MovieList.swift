@@ -6,13 +6,36 @@
 //
 
 import SwiftUI
-
+import SwiftData
 struct MovieList: View {
+    // Allow to look for certain model
+    @Query private var movies: [Movie] // fetch
+    @State private var isAddMoviePresented: Bool = false
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack{
+            Text("Movie list 🍿🎬")
+                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                .padding(.trailing)
+            MovieListview(movies: movies)
+                .toolbar(content: {
+                    ToolbarItem(placement: .topBarTrailing){
+                        Button("Add movie"){
+                            isAddMoviePresented = true
+                        }
+                    }
+                })
+                .sheet(isPresented: $isAddMoviePresented, content: {
+                    NavigationStack{
+                        Addmovie()
+                    }
+                })
+        }
     }
 }
 
 #Preview {
-    MovieList()
+    NavigationStack{
+        MovieList()
+    }
+        .modelContainer(for: [Movie.self])
 }
